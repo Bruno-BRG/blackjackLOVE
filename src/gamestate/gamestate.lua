@@ -1,16 +1,28 @@
-local Gamestate = {}
+local Load = {}
 
-function Gamestate:new()
-	local gamestate = {
-		draw,
-		playing,
-		winning,
-		losing,
-		startgame,
-	}
+function Load:loadGameState()
+		local gameState = {
+				player = {
+						hands = {},
+						chips = 1000,
+						bet = 0,
+						insuranceBet = 0,
+						blackjack = false,
+						busted = false,
+						hasBlackjack = false,
+				},
+				dealer = {
+						hand = {},
+						busted = false,
+				},
+				deck = {
+						cards = {},
+						discardPile = {},
+				},
+				gameOver = false,
+		}
 
-	setmetatable(gamestate, { __index = Gamestate })
-	return gamestate
+		return gameState
 end
 
-return Gamestate
+

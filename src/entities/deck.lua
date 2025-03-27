@@ -1,36 +1,47 @@
-local Cards = require "src.entities.card"
-
 local Deck = {}
-local suits = Cards.suits
-local value = Cards.values
+Deck.__index = Deck
 
-function Deck:new()
-    local deck = {
-        cards = {},
-    }
-
-    for _, suit_value in pairs(suits) do
-        for card_number = 1, 13 do
-            local deck_value
-            if card_number == 1 then
-                deck_value = value.ACE
-            elseif card_number == 11 then
-                deck_value = value.JACK
-            elseif card_number == 12 then
-                deck_value = value.QUEEN
-            elseif card_number == 13 then
-                deck_value = value.KING
-            else
-                deck_value = card_number
-            end
-
-            table.insert(deck.cards, Cards:new(suit_value, deck_value))
+function Deck.new()
+    local self = setmetatable({}, Deck)
+    self.cards = {}
+    self.discardPile = {}
+    
+    -- Create deck data
+    local suits = {"hearts", "diamonds", "clubs", "spades"}
+    local values = {"A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"}
+    
+    -- Populate deck with card data
+    for _, suit in ipairs(suits) do
+        for _, value in ipairs(values) do
+            table.insert(self.cards, {
+                suit = suit,
+                value = value,
+                -- Calculate blackjack value
+                bjValue = (value == "A") and 11 or
+                         (value == "J" or value == "Q" or value == "K") and 10 or
+                         tonumber(value)
+            })
         end
     end
+    
+    return self
+end
 
-    setmetatable(deck, self)
-    self.__index = self
-    return deck
+function Deck:shuffle()
+    for i = #self.cards, 2, -1 do
+        local j = math.random(i)
+        self.cards[i], self.cards[j] = self.cards[j], self.cards[i]
+    end
+end
+
+function Deck:drawCard()
+    if #self.cards == 0 then
+        -- Reshuffle discard pile if deck is empty
+        self.cards = self.discardPile
+        self.discardPile = {}
+        self:shuffle()
+    end
+    return table.remove(self.cards)
 end
 
 return Deck
